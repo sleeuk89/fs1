@@ -111,4 +111,4 @@ if st.button("Generate Featured Snippet Content"):
                 if optimised_content:
                     st.write(f"**Optimised Content:**\n{optimised_content}")
         else:
-            st.warning("No Featu
+            st.warning("No Featured Snippet found. Try a different keyword.")
