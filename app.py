@@ -3,6 +3,8 @@ import openai
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 # Streamlit App Setup
@@ -32,17 +34,32 @@ def get_featured_snippet(keyword):
     
     try:
         driver.get(url)
-        time.sleep(3)  # Give the page time to load (you may need to adjust this)
         
-        # Try to find the featured snippet using the correct CSS selector
-        snippet = None
+        # Wait for Featured Snippet or the first search result to load
+        wait = WebDriverWait(driver, 10)
         try:
-            snippet_element = driver.find_element(By.CSS_SELECTOR, "div.BNeawe.iBp4i.AP7Wnd")
+            # Wait until the snippet appears (this selector may need tweaking)
+            snippet_element = wait.until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "div.BNeawe.iBp4i.AP7Wnd"))
+            )
             snippet = snippet_element.text
-        except Exception:
-            st.warning("No Featured Snippet found for this keyword in Google UK.")
+        except:
+            snippet = None
+
+        # If not found, try another selector for other snippet formats
+        if not snippet:
+            try:
+                snippet_element = driver.find_element(By.CSS_SELECTOR, "div.g span.BNeawe.s3v9rd.AP7Wnd")
+                snippet = snippet_element.text
+            except:
+                snippet = None
         
-        return snippet
+        if snippet:
+            return snippet
+        else:
+            st.warning("No Featured Snippet found for this keyword in Google UK.")
+            return None
+
     except Exception as e:
         st.error(f"Error fetching the Google page: {e}")
         return None
@@ -88,10 +105,4 @@ if st.button("Generate Featured Snippet Content"):
             st.write("#### Generate Optimised Content to Beat This Snippet:")
         
             # Use OpenAI to generate optimised content
-            with st.spinner('Generating optimised content...'):
-                time.sleep(2)  # Simulate some processing time
-                optimised_content = generate_optimised_content(keyword, openai_api_key)
-                if optimised_content:
-                    st.write(f"**Optimised Content:**\n{optimised_content}")
-        else:
-            st.warning("No Featured Snippet found. Try a different keyword.")
+            with st.spinner('Generating opt
