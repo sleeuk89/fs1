@@ -105,4 +105,10 @@ if st.button("Generate Featured Snippet Content"):
             st.write("#### Generate Optimised Content to Beat This Snippet:")
         
             # Use OpenAI to generate optimised content
-            with st.spinner('Generating opt
+            with st.spinner('Generating optimised content...'):
+                time.sleep(2)  # Simulate some processing time
+                optimised_content = generate_optimised_content(keyword, openai_api_key)
+                if optimised_content:
+                    st.write(f"**Optimised Content:**\n{optimised_content}")
+        else:
+            st.warning("No Featu
