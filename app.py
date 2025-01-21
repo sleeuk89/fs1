@@ -1,7 +1,8 @@
 import streamlit as st
-import requests
-from bs4 import BeautifulSoup
 import openai
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 import time
 
 # Streamlit App Setup
@@ -15,28 +16,38 @@ st.markdown("""
 openai_api_key = st.text_input("Enter your OpenAI API Key", type="password")
 keyword = st.text_input("Enter target keyword/topic:")
 
-# Function to scrape Google's Featured Snippet for a given keyword (UK-based)
+# Function to scrape Google's Featured Snippet using Selenium (UK-based)
 def get_featured_snippet(keyword):
-    headers = {"User-Agent": "Mozilla/5.0"}
+    # Set up Chrome options for Selenium
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Run in headless mode (without opening the browser window)
+    chrome_options.add_argument("--disable-gpu")  # Disable GPU hardware acceleration
+    
+    # Path to your ChromeDriver (update the path if necessary)
+    driver_path = '/path/to/chromedriver'
+    driver = webdriver.Chrome(executable_path=driver_path, options=chrome_options)
+    
     # UK Google domain for SERP
     url = f"https://www.google.co.uk/search?q={keyword}"
     
     try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()  # Raise an exception for bad status codes
-        soup = BeautifulSoup(response.text, "html.parser")
+        driver.get(url)
+        time.sleep(3)  # Give the page time to load (you may need to adjust this)
         
-        # Attempt to find the featured snippet
+        # Try to find the featured snippet using the correct CSS selector
         snippet = None
         try:
-            snippet = soup.find("div", class_="BNeawe iBp4i AP7Wnd").text
-        except AttributeError:
+            snippet_element = driver.find_element(By.CSS_SELECTOR, "div.BNeawe.iBp4i.AP7Wnd")
+            snippet = snippet_element.text
+        except Exception:
             st.warning("No Featured Snippet found for this keyword in Google UK.")
+        
         return snippet
-
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
         st.error(f"Error fetching the Google page: {e}")
         return None
+    finally:
+        driver.quit()  # Close the browser
 
 # Function to generate optimised content using OpenAI
 def generate_optimised_content(question, api_key):
