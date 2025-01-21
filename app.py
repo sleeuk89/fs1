@@ -4,9 +4,9 @@ from bs4 import BeautifulSoup
 import openai
 
 # Streamlit App Setup
-st.title("Featured Snippet SEO Content Generator")
+st.title("Featured Snippet SEO Content Generator (UK-based)")
 st.markdown("""
-    This app helps you generate optimised content to win Featured Snippets on Google.
+    This app helps you generate optimised content to win Featured Snippets on Google UK.
     Simply input a target keyword/topic, and the app will scrape Google's Featured Snippet and generate superior content using OpenAI.
 """)
 
@@ -14,10 +14,11 @@ st.markdown("""
 openai_api_key = st.text_input("Enter your OpenAI API Key", type="password")
 keyword = st.text_input("Enter target keyword/topic:")
 
-# Function to scrape Google's Featured Snippet for a given keyword
+# Function to scrape Google's Featured Snippet for a given keyword (UK-based)
 def get_featured_snippet(keyword):
     headers = {"User-Agent": "Mozilla/5.0"}
-    url = f"https://www.google.com/search?q={keyword}"
+    # UK Google domain for SERP
+    url = f"https://www.google.co.uk/search?q={keyword}"
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
     
@@ -26,7 +27,7 @@ def get_featured_snippet(keyword):
     try:
         snippet = soup.find("div", class_="BNeawe iBp4i AP7Wnd").text
     except AttributeError:
-        st.warning("No Featured Snippet found for this keyword.")
+        st.warning("No Featured Snippet found for this keyword in Google UK.")
     return snippet
 
 # Function to generate optimised content using OpenAI
@@ -55,13 +56,13 @@ if st.button("Generate Featured Snippet Content"):
     if not openai_api_key or not keyword:
         st.error("Please enter both the OpenAI API key and a keyword.")
     else:
-        st.info("Fetching Google's Featured Snippet...")
+        st.info("Fetching Google's Featured Snippet from Google UK...")
         
-        # Get existing featured snippet from Google
+        # Get existing featured snippet from Google UK
         snippet = get_featured_snippet(keyword)
         
         if snippet:
-            st.success(f"Existing Featured Snippet: {snippet}")
+            st.success(f"Existing Featured Snippet from Google UK: {snippet}")
             st.write("#### Generate Optimised Content to Beat This Snippet:")
         
             # Use OpenAI to generate optimised content
